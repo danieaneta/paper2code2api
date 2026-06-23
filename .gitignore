@@ -1,0 +1,20 @@
+# Datasets (downloaded at train time, not redistributed)
+**/data/
+*.gz
+*.idx*-ubyte
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Generated test artifacts
+**/test_digit.png
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
