@@ -559,7 +559,7 @@ Every CNN that followed — AlexNet, VGG, ResNet, the networks in your phone's c
 
 **Next: [Lesson 2 · AlexNet (2012)](../alexnet)** *(coming soon)* — the network that, fourteen years later, took these same ideas, scaled them up with ReLU and GPUs, trained on millions of real color photos, and kicked off the deep-learning explosion.
 
-← Back to the [**course home**](../../../README.md) · See the full roadmap in [PAPERS.md](../../../PAPERS.md)
+← Back to the [**course home**](../../../README.md)
 
 ---
 

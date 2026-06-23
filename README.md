@@ -24,7 +24,7 @@ Think of it as a textbook where every chapter ends with a running program.
 
 ## 📚 Table of Contents — the curriculum
 
-Lessons marked ✅ are written and runnable. The full ~50-paper roadmap lives in **[PAPERS.md](PAPERS.md)**.
+Lessons marked ✅ are written and runnable; the rest are planned and added over time.
 
 ### Stage 1 · Foundations
 
@@ -38,9 +38,9 @@ Lessons marked ✅ are written and runnable. The full ~50-paper roadmap lives in
 
 | # | Lesson | What you'll build | Status |
 |---|---|---|---|
-| – | ResNet, U-Net, MobileNet, EfficientNet … | see [PAPERS.md](PAPERS.md) | 🔜 |
+| – | ResNet, U-Net, MobileNet, EfficientNet … | classifiers / backbones | 🔜 |
 
-> Stages 3–6 (Detection & Segmentation, Generative, Transformers & Multimodal, Advanced) plus specialized tracks (OCR, Video, Pose, Face, Medical, Efficiency) are all mapped in **[PAPERS.md](PAPERS.md)** and will be added as lessons over time.
+> Stages 3–6 (Detection & Segmentation, Generative, Transformers & Multimodal, Advanced) plus specialized tracks (OCR, Video, Pose, Face, Medical, Efficiency) are planned and will be added as lessons over time.
 
 ---
 
@@ -80,8 +80,8 @@ The very first lesson trains LeNet-5 to read handwritten digits at ~99% accuracy
 
 ## Licensing
 
-Course code is **MIT** (see [`LICENSE`](LICENSE)). Third-party paper weights, datasets, and official implementations carry **their own** licenses — some non-commercial or copyleft. Always check each lesson's `LICENSE-NOTES.md` and the licensing section of [PAPERS.md](PAPERS.md) before redistributing or serving anything you didn't train yourself.
+Course code is **MIT** (see [`LICENSE`](LICENSE)). Third-party paper weights, datasets, and official implementations carry **their own** licenses — some non-commercial or copyleft. Always check each lesson's `LICENSE-NOTES.md` before redistributing or serving anything you didn't train yourself.
 
 ## Status
 
-🚧 Early and active. LeNet-5 is the first full lesson and the template for the rest. Contributions welcome — pick a paper from [PAPERS.md](PAPERS.md), follow the lesson template, open a PR.
+🚧 Early and active. LeNet-5 is the first full lesson and the template for the rest. Contributions welcome — pick a paper, follow the lesson template, open a PR.

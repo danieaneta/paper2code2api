@@ -13,6 +13,9 @@ venv/
 # Generated test artifacts
 **/test_digit.png
 
+# Internal roadmap — kept local, not published
+PAPERS.md
+
 # OS / editor
 .DS_Store
 Thumbs.db
