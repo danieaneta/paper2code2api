@@ -37,6 +37,8 @@ GET  /health                       -> { status, model_loaded }
 |---|---|---|---|
 | 1 · Foundations | [**LeNet-5** (1998)](papers/stage1-foundations/lenet5) | ✅ trained (98.7% MNIST) + API | `POST /predict` → digit |
 
+![LeNet-5 inputs and predictions](papers/stage1-foundations/lenet5/assets/examples_grid.png)
+
 ### Try LeNet-5 in 3 commands
 
 ```bash

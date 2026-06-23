@@ -9,6 +9,18 @@ has followed.
 
 **Paper:** *Gradient-Based Learning Applied to Document Recognition*, LeCun, Bottou, Bengio, Haffner, Proc. IEEE 1998.
 
+## Example inputs & outputs
+
+Predictions from the trained model (`lenet5.pt`) on MNIST test digits — green = correct:
+
+![LeNet-5 input/output grid](assets/examples_grid.png)
+
+The model outputs a probability over all 10 digit classes; the API returns the argmax plus the full vector:
+
+![LeNet-5 single prediction detail](assets/prediction_detail.png)
+
+*(Regenerate with `python make_examples.py`.)*
+
 ## The idea in one minute
 
 - **Local receptive fields + weight sharing (convolution):** detect a feature
