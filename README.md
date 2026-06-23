@@ -1,66 +1,85 @@
 # paper2code2api
 
-> Turning landmark **computer-vision papers** into clean **reference implementations** and callable **inference APIs**.
-> Every paper → readable code → a standard API endpoint. Open source, learn-by-building.
+> **A hands-on course in computer vision — learn by rebuilding the papers that built the field.**
+> For each landmark paper you'll understand the idea in plain English, build the model yourself, train it, and wrap it in a working API.
 
-Most "paper implementations" are either a research dump you can't run or a black-box library you can't learn from. **paper2code2api** aims for both: each paper gets a from-scratch, well-commented implementation *and* a uniform REST API so you can actually call it.
+Most people learn deep learning backwards: they import a black box and never see what's inside. This course does the opposite. You start at the very first convolutional network (1998) and work forward, **reimplementing each paper from scratch** with heavily-commented code and a beginner-friendly lesson — then turning each model into a callable API so you can actually *use* what you built.
 
-## How it's organized
+Think of it as a textbook where every chapter ends with a running program.
 
-- **[`PAPERS.md`](PAPERS.md)** — the master curriculum: ~50 papers across 6 stages (Foundations → Advanced) plus specialized tracks (OCR, Video, Pose, Face, Medical, Efficiency). Each entry is annotated with difficulty, dataset, license status, and the natural API shape.
-- **`papers/<stage>/<slug>/`** — one self-contained folder per paper.
+---
 
-Every paper folder follows the same layout:
+## How to use this as a course
 
-| File | Purpose |
+1. **Start at Stage 1, Lesson 1** and work down in order — each paper builds on ideas from the last.
+2. **Open the lesson README** in each paper's folder. It teaches the concept from scratch — no prior deep-learning knowledge assumed.
+3. **Build it yourself.** Each lesson walks through the code (`model.py`, `train.py`, `infer.py`, `api.py`) and ends with exercises.
+4. **Run it.** Train the model, then start the API and send it your own images.
+
+**Prerequisites:** basic Python (functions, classes, loops). Math is explained in plain language as it comes up — you do *not* need a math degree to start.
+
+---
+
+## 📚 Table of Contents — the curriculum
+
+Lessons marked ✅ are written and runnable. The full ~50-paper roadmap lives in **[PAPERS.md](PAPERS.md)**.
+
+### Stage 1 · Foundations
+
+| # | Lesson | What you'll build | Status |
+|---|---|---|---|
+| 1 | [**LeNet-5** (1998) — Your First Convolutional Network](papers/stage1-foundations/lenet5) | A handwritten-digit classifier (MNIST) + a `POST /predict` API | ✅ |
+| 2 | AlexNet (2012) — Deep Learning Goes Mainstream | Image classifier on real photos | 🔜 |
+| 3 | VGG (2014) — Going Deeper with Small Filters | Classifier / feature extractor | 🔜 |
+
+### Stage 2 · Core Architectures
+
+| # | Lesson | What you'll build | Status |
+|---|---|---|---|
+| – | ResNet, U-Net, MobileNet, EfficientNet … | see [PAPERS.md](PAPERS.md) | 🔜 |
+
+> Stages 3–6 (Detection & Segmentation, Generative, Transformers & Multimodal, Advanced) plus specialized tracks (OCR, Video, Pose, Face, Medical, Efficiency) are all mapped in **[PAPERS.md](PAPERS.md)** and will be added as lessons over time.
+
+---
+
+## What every lesson folder contains
+
+| File | What it's for |
 |---|---|
-| `README.md` | Paper summary + the idea + architecture |
-| `model.py` | The reference implementation |
-| `train.py` | Reproduce / train weights |
-| `infer.py` | Preprocess + predict (CLI + library) |
-| `api.py` | FastAPI server — the shared `POST /predict` contract |
-| `LICENSE-NOTES.md` | Per-paper license status |
-| `requirements.txt` | Dependencies |
+| `README.md` | **The lesson** — explains the paper for beginners and walks you through building it |
+| `model.py` | The neural network, implemented from scratch and commented |
+| `train.py` | Trains the model on its dataset |
+| `infer.py` | Runs a prediction on a single image |
+| `api.py` | A FastAPI server exposing the shared `POST /predict` contract |
+| `make_examples.py` | Generates the input/output example images |
+| `LICENSE-NOTES.md` | License status for that paper's code, weights, and data |
+| `requirements.txt` | What to `pip install` |
 
 ## The shared API contract
 
-Every paper exposes the same baseline so they're interchangeable:
+Every model speaks the same language, so they're interchangeable:
 
 ```
 POST /predict   (multipart image)  -> JSON result
 GET  /health                       -> { status, model_loaded }
 ```
 
-## Implemented so far
+---
 
-| Stage | Paper | Status | Demo |
-|---|---|---|---|
-| 1 · Foundations | [**LeNet-5** (1998)](papers/stage1-foundations/lenet5) | ✅ trained (98.7% MNIST) + API | `POST /predict` → digit |
+## Quick taste — Lesson 1 output
+
+The very first lesson trains LeNet-5 to read handwritten digits at ~99% accuracy:
 
 ![LeNet-5 inputs and predictions](papers/stage1-foundations/lenet5/assets/examples_grid.png)
 
-### Try LeNet-5 in 3 commands
+→ **[Start Lesson 1: LeNet-5](papers/stage1-foundations/lenet5)**
 
-```bash
-cd papers/stage1-foundations/lenet5
-pip install -r requirements.txt
-uvicorn api:app --reload     # weights (lenet5.pt) are included — works out of the box
-# open http://127.0.0.1:8000/docs
-```
-
-```bash
-curl -F "file=@your_digit.png" "http://127.0.0.1:8000/predict?invert=false"
-# -> {"prediction": 7, "confidence": 0.9998, "probabilities": [...]}
-```
+---
 
 ## Licensing
 
-Original code in this repo is **MIT** (see [`LICENSE`](LICENSE)). But **third-party paper weights, datasets, and official implementations carry their own licenses** — some are non-commercial or copyleft (e.g. AGPL). Always check the per-paper `LICENSE-NOTES.md` and the licensing section of [`PAPERS.md`](PAPERS.md) before redistributing or serving anything you didn't train yourself here.
-
-## Roadmap
-
-Working down the curriculum in [`PAPERS.md`](PAPERS.md), Stage 1 first. Next up: AlexNet, VGG, ResNet, U-Net. Contributions welcome — pick an unimplemented paper, follow the folder template, open a PR.
+Course code is **MIT** (see [`LICENSE`](LICENSE)). Third-party paper weights, datasets, and official implementations carry **their own** licenses — some non-commercial or copyleft. Always check each lesson's `LICENSE-NOTES.md` and the licensing section of [PAPERS.md](PAPERS.md) before redistributing or serving anything you didn't train yourself.
 
 ## Status
 
-🚧 Early and active. LeNet-5 is the reference template; the rest of the curriculum is mapped and ready to build.
+🚧 Early and active. LeNet-5 is the first full lesson and the template for the rest. Contributions welcome — pick a paper from [PAPERS.md](PAPERS.md), follow the lesson template, open a PR.
