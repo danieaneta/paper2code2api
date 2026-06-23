@@ -67,6 +67,8 @@ That sliding-and-matching operation is a **convolution**, and the stamp is calle
 
 And here's the beautiful part: **we don't tell the filter what pattern to look for.** Its 25 numbers are knobs, learned during training. The network *discovers* on its own that edges and curves are useful for telling digits apart. That's the "learn the features yourself" idea, made concrete.
 
+![How convolution works: a 5x5 filter slides across the input to build a feature map](assets/convolution.png)
+
 ### Feature maps: the output of a stamp
 
 When you slide one filter over the whole image and write down its match-score at every position, the result is a new grid of numbers called a **feature map** — literally a map of *where in the image that feature was found*. One filter → one feature map.
@@ -81,6 +83,8 @@ Why throw away detail on purpose? Two reasons:
 
 1. **Robustness to small shifts.** If a feature moves by one pixel, the pooled summary barely changes. The network stops caring about *exactly* where a stroke is, only that it's roughly there — which is what you want, since people don't write in pixel-perfect positions.
 2. **Efficiency.** Smaller maps mean less computation for the layers that follow.
+
+![How average pooling works: each 2x2 block becomes its average](assets/pooling.png)
 
 One more squash to mention: between these steps each value is passed through an **activation function** that bends it into a gentle S-curve. LeNet uses **tanh** (the hyperbolic tangent), which maps any number to a value between −1 and +1. The point is to add a little non-linearity so the network can model curvy, complicated relationships instead of just straight-line ones. (Modern networks usually use a simpler function called ReLU — you'll get to try swapping it in the exercises.)
 
@@ -102,6 +106,8 @@ input 1×32×32
  └ F6  fully-connected 120 -> 84           + tanh
  └ out fully-connected 84 -> 10            (one score per digit 0–9)
 ```
+
+![LeNet-5 architecture block diagram](assets/architecture.png)
 
 Read the shapes as `channels × height × width`. Let's walk through it.
 
@@ -161,6 +167,10 @@ python model.py
 ```
 
 > **Tip:** The `if __name__ == "__main__"` block at the bottom of `model.py` runs a "sanity check" — it pushes a random 1×32×32 tensor through the network just to confirm the shapes line up end to end and prints the parameter count. Running a file directly to test it is a handy habit.
+
+And here's the real payoff. Run `python make_figures.py` and you can *see* what those layers actually learned. Below, a real **7** flows through the trained network: the six **C1** maps light up along the digit's edges and strokes, while the sixteen deeper **C3** maps respond to more abstract combinations of those features. This is the "hierarchy of features" from Section 2 — no longer an analogy, but the actual output of your model.
+
+![Real C1 and C3 feature maps produced by the trained model on a handwritten 7](assets/feature_maps.png)
 
 ---
 
@@ -562,6 +572,7 @@ Every CNN that followed — AlexNet, VGG, ResNet, the networks in your phone's c
 | `train.py` | Train on MNIST, save `lenet5.pt` |
 | `infer.py` | Preprocess + predict; usable standalone or as a library |
 | `api.py` | FastAPI server exposing the shared `POST /predict` contract |
-| `make_examples.py` | Generates the example figures above |
+| `make_examples.py` | Generates the input/output example figures |
+| `make_figures.py` | Generates the teaching diagrams (architecture, convolution, pooling, feature maps) |
 | `requirements.txt` | Dependencies |
 | `LICENSE-NOTES.md` | License status (✅ safe to ship) |
