@@ -5,6 +5,8 @@
 
 Most people learn deep learning backwards: they import a black box and never see what's inside. This course does the opposite. You start at the very first convolutional network (1998) and work forward, **reimplementing each paper from scratch** with heavily-commented code and a beginner-friendly lesson — then turning each model into a callable API so you can actually *use* what you built.
 
+Every lesson does the thing that usually stops people cold: it **maps the paper's actual equations to the exact lines of code that implement them.** That paper-math-to-code leap is the real skill — and the whole point of this course.
+
 Think of it as a textbook where every chapter ends with a running program.
 
 ---

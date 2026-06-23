@@ -16,6 +16,7 @@ That grid above is your goal: a program that looks at a fuzzy 28×28 image of a 
 - **What a neural network is** — in one honest paragraph, no mystique.
 - **The three big ideas** behind every CNN ever made: convolution, feature maps, and pooling — explained with plain analogies.
 - **How LeNet-5 is wired**, layer by layer, and *why* each layer is there.
+- **How to turn the paper's equations into code** — the exact skill that lets you implement *any* paper, not just this one.
 - **How to train it** on the MNIST dataset and reach ~98.7% test accuracy.
 - **How to wrap it in an API** so you can send it your own digit images and get a prediction back.
 
@@ -163,7 +164,137 @@ python model.py
 
 ---
 
-## 4. Faithful vs. modernized — what we changed and why
+## 4. From the paper's equations to code
+
+This is the part most tutorials skip — and it's the exact wall people hit when they try to implement a paper themselves. A paper states an operation as a formula full of Greek letters and subscripts; your job is to recognize *which line of code is that formula*. Below we take the core LeNet-5 equations straight from the 1998 paper and show the PyTorch that implements each one. Do this enough times and a paper's math stops being scary — you start seeing the code hiding inside it.
+
+> **How to read this:** for each operation we show the paper's equation, translate every symbol into plain words, then show the code. The recurring punchline — *a page of math becomes a handful of well-named PyTorch calls.*
+
+### 4.1 Convolution — the heart of it
+
+A convolutional feature map takes every local 5×5 patch of the input, multiplies it by a shared filter, sums, adds a bias. The value of feature map $j$ at position $(x, y)$ is:
+
+$$
+a_j(x, y) \;=\; b_j \;+\; \sum_{c}\;\sum_{u=0}^{4}\;\sum_{v=0}^{4} \; w_{j,c}(u, v)\,\cdot\, z_c\big(x+u,\; y+v\big)
+$$
+
+Symbol by symbol:
+
+- $z_c$ — the input, channel $c$ (C1 has one channel: the grayscale image).
+- $w_{j,c}(u,v)$ — the **filter**: a 5×5 grid of learnable weights ($u,v$ run 0–4). One filter per output map $j$, and crucially it's the *same* filter at every position $(x,y)$ — that's **weight sharing**.
+- $b_j$ — one learnable bias per output map.
+- The triple sum just says "line the 5×5 filter up over the patch, multiply element-wise, add it all up" — repeated for every input channel $c$.
+
+In code, that whole equation — the sliding, the multiply-add over all channels, the per-map bias, the weight sharing — is **one line**:
+
+```python
+nn.Conv2d(in_channels=1, out_channels=6, kernel_size=5)   # C1
+```
+
+You never write the loops. `nn.Conv2d` *is* the equation: `out_channels=6` means "six filters → six feature maps $j$," `kernel_size=5` is the 5×5 grid of weights $w$, and the bias $b_j$ is included by default. This single translation underlies almost every computer-vision paper ever written — learn to see it and you've learned to read half the field.
+
+### 4.2 The output-size formula — your shape detective
+
+The question that stalls every from-scratch attempt: *"why does 32×32 turn into 28×28?"* There's an equation for that, and you'll reach for it constantly to make layers fit together:
+
+$$
+O \;=\; \left\lfloor \frac{W - F + 2P}{S} \right\rfloor + 1
+$$
+
+where $W$ = input size, $F$ = filter size, $P$ = padding, $S$ = stride. For C1: $W=32,\,F=5,\,P=0,\,S=1$ → $O = (32-5)/1 + 1 = 28$. That's where the **28** in 6×28×28 comes from. Pooling uses the same formula with $F=S=2$. Trace it down and the entire shape column of the diagram falls right out:
+
+| Layer | $W$ | $F$ | $P$ | $S$ | → $O$ |
+|---|---|---|---|---|---|
+| C1 | 32 | 5 | 0 | 1 | **28** |
+| S2 | 28 | 2 | 0 | 2 | **14** |
+| C3 | 14 | 5 | 0 | 1 | **10** |
+| S4 | 10 | 2 | 0 | 2 | **5** |
+| C5 | 5 | 5 | 0 | 1 | **1** |
+
+> **This is the #1 debugging tool** when your own model throws a shape-mismatch error. Compute $O$ by hand for each layer and you'll find exactly where the sizes stop lining up.
+
+### 4.3 The activation function — paper vs. practice
+
+A perfect example of the gap between paper and code. The paper doesn't use plain tanh — it uses a **scaled** tanh (Appendix A), tuned so the function maps the range [−1, 1] roughly onto itself for faster convergence:
+
+$$
+f(x) \;=\; 1.7159\,\tanh\!\left(\tfrac{2}{3}\,x\right)
+$$
+
+Our code uses the *plain* version:
+
+```python
+nn.Tanh()        # f(x) = tanh(x)
+```
+
+**Why the difference?** Those magic constants were a 1998 optimization trick that modern training (better weight initialization, the Adam optimizer, mini-batching) makes unnecessary — plain tanh trains fine here. This is exactly the kind of paper-vs-code gap you should *notice and understand* rather than be tripped up by. If you wanted to be 100% faithful, it's a few lines:
+
+```python
+class ScaledTanh(nn.Module):
+    def forward(self, x):
+        return 1.7159 * torch.tanh((2 / 3) * x)
+```
+
+Dropping that in for `nn.Tanh()` is a great exercise in turning an equation directly into a layer.
+
+### 4.4 Subsampling — the paper's pooling vs. ours
+
+The original S2/S4 layers are *not* plain average pooling. The paper's subsampling cell sums its four inputs, scales them by a **trainable** coefficient $w$, adds a **trainable** bias $b$, then squashes:
+
+$$
+s(x,y) \;=\; f\!\Big(w \cdot \!\!\sum_{i=1}^{4} x_i \;+\; b\Big)
+$$
+
+That's average pooling *with two learnable knobs and a nonlinearity bolted on*. Our code uses ordinary average pooling — no trainable $w$/$b$, no activation:
+
+```python
+nn.AvgPool2d(kernel_size=2, stride=2)   # s(x,y) = mean of each 2x2 block
+```
+
+Plain averaging is just the paper's formula with $w = \tfrac14$ (turning the sum into a mean), $b = 0$, and $f$ = identity. Modern networks dropped the trainable version because it adds parameters for little gain — another concrete case of "the paper did X; today we simplify to Y," now visible right in the math.
+
+### 4.5 The output — RBF (then) vs. softmax + cross-entropy (now)
+
+The paper's final layer computed, for each class $i$, the squared Euclidean distance between the 84 features $x_j$ and a learned prototype vector $w_{ij}$:
+
+$$
+y_i \;=\; \sum_{j} \big(x_j - w_{ij}\big)^2
+$$
+
+A *smaller* $y_i$ meant "closer to the ideal digit $i$." Clever for 1998, but unusual today. We use the universal modern classifier recipe instead. First a plain linear layer produces 10 raw scores (**logits**):
+
+```python
+nn.Linear(84, 10)     # 10 raw scores, one per digit
+```
+
+Then **softmax** turns those scores into probabilities that sum to 1:
+
+$$
+p_i \;=\; \frac{e^{z_i}}{\sum_{k=0}^{9} e^{z_k}}
+$$
+
+```python
+probs = torch.softmax(logits, dim=1)      # used in infer.py
+```
+
+And training minimizes **cross-entropy** loss — for the correct label $t$, it's simply:
+
+$$
+\mathcal{L} \;=\; -\log p_t
+$$
+
+i.e. "the loss is small only when the probability assigned to the *right* digit is large." PyTorch fuses the softmax and the log into one numerically-stable call:
+
+```python
+criterion = nn.CrossEntropyLoss()         # used in train.py
+loss = criterion(model(images), labels)   # = -log(p_correct), averaged over the batch
+```
+
+That one object is the entire training objective. Notice the pattern across this whole section: **a page of paper math collapses into a handful of well-named PyTorch calls.** Learning to *see* that mapping — not memorizing the library — is the skill that lets you implement any paper you read.
+
+---
+
+## 5. Faithful vs. modernized — what we changed and why
 
 Our code is a **faithful-but-modernized** reproduction. We kept the period-authentic choices that define LeNet's character — **tanh** activations, **average** pooling, and the **32×32** padded input — but we made two deliberate simplifications so the code stays beginner-readable. It's worth knowing exactly what differs from the 1998 paper, so you're never confused comparing our code to the original.
 
@@ -175,7 +306,7 @@ Neither change alters the core lesson of the paper — convolution, pooling, and
 
 ---
 
-## 5. Build it yourself
+## 6. Build it yourself
 
 You'll work through three files in order: `model.py` (done — that was Section 3), then `train.py` to teach the network, then `infer.py` to make predictions.
 
@@ -199,7 +330,7 @@ TRANSFORM = transforms.Compose([
 ])
 ```
 
-This is the **preprocessing pipeline** every image passes through. `ToTensor` converts the image into the array format PyTorch works with. `Normalize` shifts the pixel values so they're centered around zero using MNIST's well-known average (0.1307) and spread (0.3081) — this makes training faster and steadier. `Pad(2)` adds the 2-pixel border to reach 32×32. **The exact same pipeline must be used at prediction time** — get this even slightly wrong on your own images and the network's accuracy collapses. (More on that gotcha in Section 7.)
+This is the **preprocessing pipeline** every image passes through. `ToTensor` converts the image into the array format PyTorch works with. `Normalize` shifts the pixel values so they're centered around zero using MNIST's well-known average (0.1307) and spread (0.3081) — this makes training faster and steadier. `Pad(2)` adds the 2-pixel border to reach 32×32. **The exact same pipeline must be used at prediction time** — get this even slightly wrong on your own images and the network's accuracy collapses. (More on that gotcha in Section 8.)
 
 Now the training loop itself, lightly trimmed:
 
@@ -297,11 +428,11 @@ python infer.py some_digit.png             # MNIST-style: white digit on black
 python infer.py photo_of_digit.png --invert  # your own drawing: black digit on white
 ```
 
-That `--invert` flag is important, and Section 7 explains exactly why.
+That `--invert` flag is important, and Section 8 explains exactly why.
 
 ---
 
-## 6. From model to API — `api.py`
+## 7. From model to API — `api.py`
 
 A trained model sitting in a `.pt` file isn't useful to anyone else. The final step of every lesson is to wrap it in a web API so any program (or person, via `curl`) can send it an image and get a prediction. We use **FastAPI**, a popular, beginner-friendly Python web framework.
 
@@ -363,7 +494,7 @@ This is exactly the input→output relationship, visualized — one input digit 
 
 ---
 
-## 7. The #1 gotcha: white-on-black vs. black-on-white
+## 8. The #1 gotcha: white-on-black vs. black-on-white
 
 Here's the mistake that trips up everyone the first time they feed the model their *own* digit. You'd expect: *I trained a 99%-accurate digit reader, so my hand-drawn `3` should be easy.* Instead it confidently predicts garbage. Why?
 
@@ -385,13 +516,13 @@ So the rule is simple:
 
 ---
 
-## 8. Exercises — try it yourself
+## 9. Exercises — try it yourself
 
 Work these in order; each builds a little more intuition. (Suggested solutions are an exercise in reading the code you already have.)
 
 1. **Train longer (easy).** Run `python train.py --epochs 10`. Does test accuracy keep climbing, plateau, or wobble? Compare the final number to your 5-epoch run. *Lesson: more training has diminishing returns — and eventually risks overfitting.*
 
-2. **Classify your own handwriting (easy).** Draw a single digit in any paint program on a **white** background with a thick black brush, save it as a PNG, and run `python infer.py my_digit.png --invert`. Did it get it right? Try a messy one. *Lesson: real-world inputs need the preprocessing to match — revisit Section 7 if it fails.*
+2. **Classify your own handwriting (easy).** Draw a single digit in any paint program on a **white** background with a thick black brush, save it as a PNG, and run `python infer.py my_digit.png --invert`. Did it get it right? Try a messy one. *Lesson: real-world inputs need the preprocessing to match — revisit Section 8 if it fails.*
 
 3. **Call your API (medium).** Start the server (`uvicorn api:app --reload`), open `http://127.0.0.1:8000/docs`, and upload the digit you drew. Then do the same with `curl`. Look at the full `probabilities` array — which *other* digit was the model's second guess? *Lesson: the model expresses uncertainty, not just a single answer.*
 
@@ -403,7 +534,7 @@ Work these in order; each builds a little more intuition. (Suggested solutions a
 
 ---
 
-## 9. Recap & what's next
+## 10. Recap & what's next
 
 You just built a real convolutional neural network from the ground up. Here's what you now understand:
 
