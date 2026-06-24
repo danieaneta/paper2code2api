@@ -54,6 +54,8 @@ Lessons marked ✅ are written and runnable; the rest are planned and added over
 | `infer.py` | Runs a prediction on a single image |
 | `api.py` | A FastAPI server exposing the shared `POST /predict` contract |
 | `make_examples.py` | Generates the input/output example images |
+| `make_figures.py` | Generates the teaching diagrams (architecture, convolution, pooling, feature maps) |
+| `<model>.pt` | Pretrained weights, shipped so `infer.py`/`api.py` work the moment you clone — retrain anytime with `train.py` |
 | `LICENSE-NOTES.md` | License status for that paper's code, weights, and data |
 | `requirements.txt` | What to `pip install` |
 

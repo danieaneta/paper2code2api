@@ -320,6 +320,8 @@ Neither change alters the core lesson of the paper — convolution, pooling, and
 
 You'll work through three files in order: `model.py` (done — that was Section 3), then `train.py` to teach the network, then `infer.py` to make predictions.
 
+> **Already-trained weights ship with this lesson.** The repo includes a ready-made `lenet5.pt`, so `infer.py` and the API in Section 7 work the instant you clone — no waiting. We still walk through `train.py` next because *training it yourself* is the whole point; running it simply overwrites `lenet5.pt` with your own freshly-trained weights.
+
 **Setup.** From inside the `lenet5` folder:
 
 ```bash
@@ -570,6 +572,7 @@ Every CNN that followed — AlexNet, VGG, ResNet, the networks in your phone's c
 | `README.md` | This lesson |
 | `model.py` | LeNet-5 architecture — the reference implementation |
 | `train.py` | Train on MNIST, save `lenet5.pt` |
+| `lenet5.pt` | Pretrained weights (ship with the repo) — `infer.py`/`api.py` work on clone; `train.py` overwrites it |
 | `infer.py` | Preprocess + predict; usable standalone or as a library |
 | `api.py` | FastAPI server exposing the shared `POST /predict` contract |
 | `make_examples.py` | Generates the input/output example figures |
