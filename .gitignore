@@ -12,6 +12,7 @@ venv/
 
 # Generated test artifacts
 **/test_digit.png
+**/train_log.txt
 
 # Internal roadmap — kept local, not published
 PAPERS.md

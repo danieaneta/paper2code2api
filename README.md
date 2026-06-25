@@ -31,7 +31,7 @@ Lessons marked ✅ are written and runnable; the rest are planned and added over
 | # | Lesson | What you'll build | Status |
 |---|---|---|---|
 | 1 | [**LeNet-5** (1998) — Your First Convolutional Network](papers/stage1-foundations/lenet5) | A handwritten-digit classifier (MNIST) + a `POST /predict` API | ✅ |
-| 2 | AlexNet (2012) — Deep Learning Goes Mainstream | Image classifier on real photos | 🔜 |
+| 2 | [**AlexNet** (2012) — Deep Learning Goes Mainstream](papers/stage1-foundations/alexnet) | An image classifier on real photos (CIFAR-10) + a `POST /predict` API | ✅ |
 | 3 | VGG (2014) — Going Deeper with Small Filters | Classifier / feature extractor | 🔜 |
 
 ### Stage 2 · Core Architectures
